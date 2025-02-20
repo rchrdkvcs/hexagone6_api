@@ -9,6 +9,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+const RegisterController = () => import('#auth/controller/register_controller')
 
 const LoginController = () => import('#auth/controller/login_controller')
 // const RegisterController = () => import('#auth/controller/register_controller')
@@ -23,7 +24,7 @@ const GenerateUrlsController = () =>
 import('../app/banphase/controller/generate_urls_controller.js')
 
 router.post('/login', [LoginController, 'execute'])
-// router.post('/register', [RegisterController, 'execute'])
+router.post('/register', [RegisterController, 'execute'])
 
 router
   .group(() => {
