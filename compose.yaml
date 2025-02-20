@@ -3,7 +3,7 @@ services:
     image: postgres:alpine
     container_name: hexagone_db
     environment:
-      POSTGRES_DB: hexagone
+      POSTGRES_DB: postgres
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
     ports:
