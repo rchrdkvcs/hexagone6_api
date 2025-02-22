@@ -1,20 +1,20 @@
 FROM node:latest AS base
 
-# Install pnpm
+# Install bun
 WORKDIR /app
-RUN npm install -g pnpm
+RUN npm install -g bun
 
 # All deps stage
 FROM base AS deps
 WORKDIR /app
-ADD package.json pnpm-lock.yaml ./
-RUN pnpm install
+ADD package.json ./
+RUN bun install
 
 # Production only deps stage
 FROM base AS production-deps
 WORKDIR /app
-ADD package.json pnpm-lock.yaml ./
-RUN pnpm install --production
+ADD package.json ./
+RUN bun install --production
 
 # Build stage
 FROM base AS build
