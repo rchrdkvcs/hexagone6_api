@@ -1,15 +1,8 @@
 services:
-  db:
-    image: postgres:alpine
-    container_name: hexagone_db
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
+  app:
+    container_name: hexagone_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - '5432:5432'
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-volumes:
-  db_data:
+      - '3000:3000'
