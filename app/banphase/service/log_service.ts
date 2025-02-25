@@ -1,52 +1,63 @@
+export interface LogEntry {
+  mapName: string
+  type: 'pick' | 'decider'
+  side?: 'Attacker' | 'Defender'
+}
+
 export default class LogService {
-  async fetchLogData(url: string) {
-    try {
-      const fetchResponse = await fetch(url)
+  async fetchLogData(url: string): Promise<LogEntry[]> {
+    const response = await fetch(url)
+    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`)
+    return this.parseLogs(await response.text())
+  }
 
-      if (!fetchResponse.ok) {
-        throw new Error(`Erreur HTTP: ${fetchResponse.status}`)
-      }
+  private parseLogs(html: string): LogEntry[] {
+    const logDataMatch = html.match(/<p id="logdata"[^>]*>([\s\S]*?)<\/p>/i)
+    if (!logDataMatch) return []
 
-      const htmlContent = await fetchResponse.text()
-      const logDataRegex = /<p id="logdata"[^>]*>([\s\S]*?)<\/p>/i
-      const logDataMatch = htmlContent.match(logDataRegex)
+    const logText = logDataMatch[1]
+    const entries: LogEntry[] = []
+    let lastMap: string | null = null
 
-      if (!logDataMatch || !logDataMatch[1]) {
-        return null
-      }
+    const regex =
+      /(Team \d+ \(.*?\) <b>(picks|bans)<\/b> Map "(.*?)"!|Map "(.*?)" will be <b>decider<\/b>!|picked <b>"(Attacker|Defender)"<\/b> as Side to start on Map "(.*?)"!)/gi
 
-      let logDataText = logDataMatch[1]
-        .replace(/<[^>]+>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/<br\s*\/?>/g, ' ')
-        .trim()
+    let match
+    while ((match = regex.exec(logText)) !== null) {
+      const [, , actionType, actionMap, deciderMap, side, sideMap] = match
 
-      const eventRegex =
-        /Team (\d+) \((.*?)\) (picks|bans) Map "(.*?)"!|Team (\d+) \((.*?)\) picked "(Attacker|Defender)" as Side to start on Map "(.*?)"!/g
-      const matches = [...logDataText.matchAll(eventRegex)]
-
-      if (matches.length === 0) {
-        return []
-      }
-
-      const results = matches
-        .filter((match) => match[8] !== undefined)
-        .map((match) => {
-          const teamName = match[6] || match[2]
-          const side = match[7] || match[3]
-          const mapName = match[8] || match[4]
-
-          return {
-            teamName,
-            side,
-            mapName,
-          }
+      if (actionType === 'picks' && actionMap) {
+        lastMap = actionMap.trim()
+        entries.push({
+          mapName: lastMap,
+          type: 'pick',
         })
-
-      return results
-    } catch (error) {
-      console.error(`Erreur lors de la récupération des logs: ${error.message}`)
-      return null
+      } else if (deciderMap) {
+        entries.push({
+          mapName: deciderMap.trim(),
+          type: 'decider',
+        })
+      } else if (side && sideMap) {
+        const targetMap = sideMap.trim()
+        const entry = entries.find((e) => e.mapName === targetMap)
+        if (entry) {
+          entry.side = side as 'Attacker' | 'Defender'
+        }
+      }
     }
+
+    return this.filterUniqueMaps(entries)
+  }
+
+  private filterUniqueMaps(entries: LogEntry[]): LogEntry[] {
+    const seen = new Set<string>()
+    return entries
+      .reverse()
+      .filter((entry) => {
+        const isNew = !seen.has(entry.mapName)
+        if (isNew) seen.add(entry.mapName)
+        return isNew
+      })
+      .reverse()
   }
 }
