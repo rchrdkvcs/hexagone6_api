@@ -3,9 +3,21 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class BanphaseMessageController {
   async execute({ request, response }: HttpContext) {
-    const { team1, url1, channel1, role1, team2, url2, channel2, role2 } = request.all()
+    const { team1, url1, channel1, role1, team2, url2, channel2, role2, urlLog } = request.all()
+    const staffChannelId = '1196931570863452253'
+    const staffRoleId = '1194673114798379108'
 
-    if (!team1 || !url1 || !channel1 || !role1 || !team2 || !url2 || !channel2 || !role2) {
+    if (
+      !team1 ||
+      !url1 ||
+      !channel1 ||
+      !role1 ||
+      !team2 ||
+      !url2 ||
+      !channel2 ||
+      !role2 ||
+      !urlLog
+    ) {
       return response.status(400).send('Missing parameters')
     }
 
@@ -22,7 +34,8 @@ export default class BanphaseMessageController {
 
         Please head to the admin office with your phone to proceed with the map ban.
         `,
-        url1
+        url1,
+        'Lien / Link'
       )
 
       await new MessageService().send(
@@ -37,7 +50,23 @@ export default class BanphaseMessageController {
 
         Please head to the admin office with your phone to proceed with the map ban.
         `,
-        url2
+        url2,
+        'Lien / Link'
+      )
+
+      await new MessageService().send(
+        staffChannelId,
+        staffRoleId,
+        `${team1} vs ${team2}`,
+        `**La phase de ban commence !**
+
+        Les équipes ${team1} et ${team2} ont été notifiées.
+
+        Lien mapban équipe : [${team1}](${url1})
+        Lien mapban équipe : [${team2}](${url2})
+        `,
+        urlLog,
+        'Fichier de log'
       )
 
       return response.status(200).json({

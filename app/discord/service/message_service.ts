@@ -8,7 +8,8 @@ export default class MessageService {
     roleId: string,
     msgTitle: string,
     msgContent: string,
-    msgLink: string
+    msgLink: string,
+    linkLabel: string
   ) {
     const client = await DiscordClientProvider.Client()
     const channel = await client.channels.fetch(channelId)
@@ -25,7 +26,7 @@ export default class MessageService {
         .setFooter({ text: 'Hexagone 6' })
 
       const link = new ButtonBuilder()
-        .setLabel('Lien / Link')
+        .setLabel(linkLabel)
         .setStyle(ButtonStyle.Link)
         .setURL(msgLink)
 
