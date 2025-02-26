@@ -55,8 +55,8 @@ export default class LogsSyncController {
         side1: '',
         map2: '',
         side2: '',
-        map3: 'S5:S38',
-        side3: 'T5:T38',
+        map3: 'U5:U38',
+        side3: 'V5:V38',
       },
     },
   ]
