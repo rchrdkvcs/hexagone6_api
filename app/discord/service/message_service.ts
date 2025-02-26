@@ -33,7 +33,7 @@ export default class MessageService {
       const row = new ActionRowBuilder().addComponents(link)
 
       // @ts-ignore
-      await channel.send({ content: `<@${roleId}>`, embeds: [embed], components: [row] })
+      await channel.send({ content: `<@&${roleId}>`, embeds: [embed], components: [row] })
     } catch (err) {
       console.error("Erreur lors de l'envoi du message :", error)
       throw new Error("Échec de l'envoi du message.")
